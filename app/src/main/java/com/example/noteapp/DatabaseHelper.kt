@@ -1,7 +1,10 @@
+package com.example.noteapp
+
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.content.ContentValues
+import android.database.Cursor
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -35,31 +38,70 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     // Hàm thêm người dùng mới vào bảng user
     fun addUser(email: String, password: String): Boolean {
-        val db = this.writableDatabase
-        val values = ContentValues().apply {
-            put(COLUMN_EMAIL, email)
-            put(COLUMN_PASSWORD, password)
+        var db: SQLiteDatabase? = null
+        return try {
+            db = this.writableDatabase
+            val values = ContentValues().apply {
+                put(COLUMN_EMAIL, email)
+                put(COLUMN_PASSWORD, password)
+            }
+            val result = db.insert(TABLE_USER, null, values)
+            result != -1L // Trả về true nếu thêm thành công
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        } finally {
+            db?.close()
         }
-        val result = db.insert(TABLE_USER, null, values)
-        db.close()
-        return result != -1L // Trả về true nếu thêm thành công
     }
+
+    // Hàm lấy tất cả thông tin người dùng (email và mật khẩu)
+    fun getAllUserDetails(): List<Pair<String, String>> {
+        val userDetails = mutableListOf<Pair<String, String>>()
+        val db = this.readableDatabase
+        var cursor: Cursor? = null
+
+        return try {
+            cursor = db.rawQuery("SELECT * FROM $TABLE_USER", null)
+            if (cursor.moveToFirst()) {
+                do {
+                    val email = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EMAIL))
+                    val password = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PASSWORD))
+                    userDetails.add(Pair(email, password))
+                } while (cursor.moveToNext())
+            }
+            userDetails
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()  // Trả về danh sách rỗng nếu có lỗi
+        } finally {
+            cursor?.close()
+            db.close()
+        }
+    }
+
 
     // Hàm kiểm tra đăng nhập của người dùng
     fun checkUser(email: String, password: String): Boolean {
         val db = this.readableDatabase
-        val cursor = db.query(
-            TABLE_USER,
-            arrayOf(COLUMN_ID),
-            "$COLUMN_EMAIL = ? AND $COLUMN_PASSWORD = ?",
-            arrayOf(email, password),
-            null,
-            null,
-            null
-        )
-        val count = cursor.count
-        cursor.close()
-        db.close()
-        return count > 0 // Trả về true nếu có ít nhất một kết quả khớp
+        var cursor: Cursor? = null
+        return try {
+            cursor = db.query(
+                TABLE_USER,
+                arrayOf(COLUMN_ID),  // Chỉ cần lấy cột ID để kiểm tra tồn tại
+                "$COLUMN_EMAIL = ? AND $COLUMN_PASSWORD = ?",  // Điều kiện truy vấn
+                arrayOf(email, password),  // Giá trị của email và password
+                null,
+                null,
+                null
+            )
+            cursor.count > 0  // Trả về true nếu có ít nhất một kết quả khớp
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        } finally {
+            cursor?.close()
+            db.close()
+        }
     }
 }

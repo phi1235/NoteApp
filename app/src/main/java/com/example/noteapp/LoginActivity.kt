@@ -1,12 +1,14 @@
 package com.example.noteapp
 
-import DatabaseHelper
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.noteapp.DatabaseHelper
 
 class LoginActivity : AppCompatActivity() {
 
@@ -35,8 +37,9 @@ class LoginActivity : AppCompatActivity() {
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Vui lòng điền đầy đủ thông tin", Toast.LENGTH_SHORT).show()
             } else {
-                // Kiểm tra xem người dùng có tồn tại trong cơ sở dữ liệu không
-                if (dbHelper.checkUser(email, password)) {
+                // Kiểm tra email và mật khẩu trong cơ sở dữ liệu
+                val isUserExists = dbHelper.checkUser(email, password)
+                if (isUserExists) {
                     Toast.makeText(this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(this, "Email hoặc mật khẩu không đúng", Toast.LENGTH_SHORT).show()
@@ -46,21 +49,15 @@ class LoginActivity : AppCompatActivity() {
 
         // Sự kiện "Tạo tài khoản"
         tvCreateAccount.setOnClickListener {
-            val email = etEmail.text.toString().trim()
-            val password = etPassword.text.toString().trim()
-
-            if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Vui lòng điền đầy đủ thông tin để tạo tài khoản", Toast.LENGTH_SHORT).show()
-            } else {
-                // Thêm người dùng vào cơ sở dữ liệu
-                if (dbHelper.addUser(email, password)) {
-                    Toast.makeText(this, "Tạo tài khoản thành công", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this, "Tạo tài khoản thất bại, vui lòng thử lại", Toast.LENGTH_SHORT).show()
-                }
-            }
+            // Tạo Intent để chuyển từ LoginActivity sang RegisterActivity
+            val intent = Intent(this, RegisterActivity::class.java)
+            startActivity(intent)  // Bắt đầu RegisterActivity
         }
-
+// In thông tin người dùng đã đăng ký ra Logcat
+        val users = dbHelper.getAllUserDetails()
+        for ((userEmail, userPassword) in users) {
+            Log.d("USER_INFO", "Email: $userEmail, Password: $userPassword")
+        }
         // Sự kiện "Quên mật khẩu?"
         tvForgotPassword.setOnClickListener {
             Toast.makeText(this, "Chức năng Quên mật khẩu chưa được phát triển", Toast.LENGTH_SHORT).show()
