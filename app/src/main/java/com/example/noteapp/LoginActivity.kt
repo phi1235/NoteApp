@@ -1,5 +1,6 @@
 package com.example.noteapp
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -8,7 +9,6 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.noteapp.DatabaseHelper
 
 class LoginActivity : AppCompatActivity() {
 
@@ -21,6 +21,15 @@ class LoginActivity : AppCompatActivity() {
 
         // Khởi tạo đối tượng DatabaseHelper
         dbHelper = DatabaseHelper(this)
+
+        // Kiểm tra trạng thái đăng nhập
+        val sharedPref = getSharedPreferences("NoteAppPreferences", Context.MODE_PRIVATE)
+        val isLoggedIn = sharedPref.getBoolean("isLoggedIn", false)
+        if (isLoggedIn) {
+            // Nếu đã đăng nhập, chuyển hướng sang MainnActivity
+            navigateToMain()
+            return
+        }
 
         // Kết nối với các thành phần UI
         val etEmail = findViewById<EditText>(R.id.etEmail)
@@ -41,6 +50,15 @@ class LoginActivity : AppCompatActivity() {
                 val isUserExists = dbHelper.checkUser(email, password)
                 if (isUserExists) {
                     Toast.makeText(this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show()
+
+                    // Lưu trạng thái đăng nhập
+                    val editor = sharedPref.edit()
+                    editor.putBoolean("isLoggedIn", true)
+                    editor.putString("userEmail", email) // Lưu thêm email của người dùng
+                    editor.apply()
+
+                    // Chuyển hướng đến màn hình chính
+                    navigateToMain()
                 } else {
                     Toast.makeText(this, "Email hoặc mật khẩu không đúng", Toast.LENGTH_SHORT).show()
                 }
@@ -53,14 +71,22 @@ class LoginActivity : AppCompatActivity() {
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)  // Bắt đầu RegisterActivity
         }
-// In thông tin người dùng đã đăng ký ra Logcat
+
+        // In thông tin người dùng đã đăng ký ra Logcat
         val users = dbHelper.getAllUserDetails()
         for ((userEmail, userPassword) in users) {
             Log.d("USER_INFO", "Email: $userEmail, Password: $userPassword")
         }
+
         // Sự kiện "Quên mật khẩu?"
         tvForgotPassword.setOnClickListener {
             Toast.makeText(this, "Chức năng Quên mật khẩu chưa được phát triển", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun navigateToMain() {
+        val intent = Intent(this, MainnActivity::class.java)
+        startActivity(intent)
+        finish() // Đóng LoginActivity để ngăn quay lại màn hình đăng nhập
     }
 }

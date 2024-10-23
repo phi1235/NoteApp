@@ -1,6 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F3F3F3"
+    tools:context=".MainActivity">
+
+    <!-- Dấu 3 gạch - Menu -->
+    <ImageView
+        android:id="@+id/ivMenu"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_menu"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    android:layout_margin="16dp"/>
+
+    <!-- Ô tìm kiếm -->
+    <EditText
+        android:id="@+id/etSearch"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:hint="Tìm kiếm..."
+        android:background="@drawable/search_background"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintStart_toEndOf="@id/ivMenu"
+    app:layout_constraintEnd_toStartOf="@id/ivProfile"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
+    android:textColor="#000000"/>
+
+    <!-- Avatar tài khoản -->
+    <ImageView
+        android:id="@+id/ivProfile"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_avatar"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    android:layout_margin="16dp"
+
+    android:padding="4dp"/>
+
+    <!-- TextView hiển thị khi không có ghi chú -->
+    <TextView
+        android:id="@+id/tvNoNotes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chưa có ghi chú nào. Hãy nhấn nút '+' để thêm ghi chú mới."
+        android:textColor="#000000"
+        android:layout_marginTop="20dp"
+        app:layout_constraintTop_toBottomOf="@id/etSearch"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone"/>
+    <!-- RecyclerView cho danh sách ghi chú -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvNotes"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/etSearch"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btnAddNote"
+        android:layout_marginTop="20dp"
+        android:padding="16dp"/>
+    <!-- Nút thêm ghi chú (dấu +) -->
+    <ImageButton
+        android:id="@+id/btnAddNote"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@drawable/ic_add"
+
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    android:layout_margin="16dp"
+    android:elevation="8dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -13,7 +13,8 @@
         android:theme="@style/Theme.NoteApp"
         tools:targetApi="31">
         <activity android:name=".RegisterActivity"></activity>
-
+        <activity android:name=".MainnActivity"></activity>
+        <activity android:name=".AddNoteActivity"></activity>
         <activity
 
         android:name=".LoginActivity"

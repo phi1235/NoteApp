@@ -2,4 +2,7 @@
     <string name="app_name">NoteApp</string>
     <string name="hint_password">**************</string>
 
+        <string name="logout">Đăng xuất</string>
+        <!-- Thêm chuỗi khác tại đây nếu cần -->
+
 </resources>
