@@ -41,8 +41,12 @@ class AddNoteActivity : AppCompatActivity() {
         // Xử lý sự kiện click vào nút lưu
         ivSave.setOnClickListener {
             saveNote()
-            finish() // Lưu ghi chú và quay lại màn hình trước đó
+
+            // Gửi kết quả về cho MainActivity để cập nhật danh sách ghi chú
+            setResult(RESULT_OK)
+            finish()
         }
+
     }
 
     private fun saveNote() {

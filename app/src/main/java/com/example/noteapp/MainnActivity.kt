@@ -28,13 +28,14 @@ class MainnActivity : AppCompatActivity() {
     private lateinit var rvNotes: RecyclerView
     private lateinit var btnAddNote: ImageButton
     private lateinit var dbHelper: DatabaseHelper
-    private var noteAdapter: NoteAdapter? = null
-    private val notesList = mutableListOf<Pair<String, String>>()
+    private lateinit var noteAdapter: NoteAdapter
+    private val notesList = mutableListOf<Pair<String, String>>() // Danh sách ghi chú
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
     }
-    // Xử lý khi người dùng chọn một mục trong menu
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_logout -> {
@@ -45,6 +46,7 @@ class MainnActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mainn)
@@ -58,6 +60,13 @@ class MainnActivity : AppCompatActivity() {
 
         // Khởi tạo DatabaseHelper
         dbHelper = DatabaseHelper(this)
+
+        // Khởi tạo Adapter với danh sách rỗng
+        noteAdapter = NoteAdapter(notesList)
+
+        // Thiết lập RecyclerView với NoteAdapter và LayoutManager
+        rvNotes.layoutManager = LinearLayoutManager(this)
+        rvNotes.adapter = noteAdapter
 
         // Cập nhật danh sách ghi chú ban đầu
         loadNotes()
@@ -77,28 +86,6 @@ class MainnActivity : AppCompatActivity() {
             val intent = Intent(this, AddNoteActivity::class.java)
             startActivityForResult(intent, ADD_NOTE_REQUEST_CODE)
         }
-        // Sự kiện click vào Dấu Ba Gạch (Menu)
-        ivMenu.setOnClickListener {
-            showPopupMenu(it)
-        }
-    }
-    // Hàm để hiển thị PopupMenu khi nhấn vào ivMenu
-    private fun showPopupMenu(view: View) {
-        val popup = PopupMenu(this, view)
-        val inflater: MenuInflater = popup.menuInflater
-        inflater.inflate(R.menu.menu_main, popup.menu)
-
-        // Xử lý sự kiện khi người dùng chọn mục trong PopupMenu
-        popup.setOnMenuItemClickListener { item: MenuItem ->
-            when (item.itemId) {
-                R.id.action_logout -> {
-                    logoutUser()
-                    true
-                }
-                else -> false
-            }
-        }
-        popup.show()
     }
 
     // Nhận kết quả từ AddNoteActivity
@@ -109,6 +96,7 @@ class MainnActivity : AppCompatActivity() {
             loadNotes()
         }
     }
+
     private fun logoutUser() {
         // Xóa thông tin đăng nhập trong SharedPreferences
         val sharedPref = getSharedPreferences("NoteAppPreferences", Context.MODE_PRIVATE)
@@ -121,6 +109,7 @@ class MainnActivity : AppCompatActivity() {
         startActivity(intent)
         finish() // Đóng MainnActivity
     }
+
     private fun loadNotes() {
         // Lấy danh sách ghi chú từ cơ sở dữ liệu và cập nhật giao diện
         notesList.clear()
@@ -131,18 +120,14 @@ class MainnActivity : AppCompatActivity() {
             Toast.makeText(this, "Chưa có ghi chú nào", Toast.LENGTH_SHORT).show()
         } else {
             rvNotes.visibility = View.VISIBLE
-
-            // Thiết lập RecyclerView với NoteAdapter
-            rvNotes.layoutManager =
-                LinearLayoutManager(this) // Thiết lập LinearLayout cho RecyclerView
-            rvNotes.adapter =
-                NoteAdapter(notesList) // Sử dụng NoteAdapter để kết nối dữ liệu với giao diện
+            // Cập nhật lại dữ liệu trong adapter và thông báo giao diện thay đổi
+            noteAdapter.notifyDataSetChanged()
         }
-        // Kiểm tra noteAdapter không bị null trước khi gọi notifyDataSetChanged
-        noteAdapter?.notifyDataSetChanged()
+
         // In ra tiêu đề của từng ghi chú trong Logcat để kiểm tra
         for (note in notesList) {
             Log.d(TAG, "Note Title: ${note.first}, Content: ${note.second}")
         }
     }
-    }
+}
+
