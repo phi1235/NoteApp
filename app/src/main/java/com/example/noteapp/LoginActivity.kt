@@ -46,21 +46,23 @@ class LoginActivity : AppCompatActivity() {
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Vui lòng điền đầy đủ thông tin", Toast.LENGTH_SHORT).show()
             } else {
-                // Kiểm tra email và mật khẩu trong cơ sở dữ liệu
                 val isUserExists = dbHelper.checkUser(email, password)
                 if (isUserExists) {
-                    Toast.makeText(this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show()
+                    val userId = dbHelper.getUserIdByEmail(email) // Lấy user_id của người dùng
 
-                    // Lưu trạng thái đăng nhập
-                    val editor = sharedPref.edit()
-                    editor.putBoolean("isLoggedIn", true)
-                    editor.putString("userEmail", email) // Lưu thêm email của người dùng
-                    editor.apply()
+                    if (userId != null) {
+                        val editor = sharedPref.edit()
+                        editor.putBoolean("isLoggedIn", true)
+                        editor.putInt("user_id", userId) // Lưu user_id vào SharedPreferences
+                        editor.apply()
 
-                    // Chuyển hướng đến màn hình chính
-                    navigateToMain()
+                        navigateToMain() // Chuyển sang MainActivity
+                    } else {
+                        Toast.makeText(this, "Không thể tìm thấy userId", Toast.LENGTH_SHORT).show()
+                    }
                 } else {
-                    Toast.makeText(this, "Email hoặc mật khẩu không đúng", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Email hoặc mật khẩu không đúng", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
         }

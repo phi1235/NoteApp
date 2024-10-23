@@ -11,8 +11,8 @@ import android.util.Log
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     companion object {
-        private const val DATABASE_NAME = "NoteApp.db"  // Tên file cơ sở dữ liệu
-        private const val DATABASE_VERSION = 2  // Phiên bản của cơ sở dữ liệu
+        private const val DATABASE_NAME = "NoteApp.db"
+        private const val DATABASE_VERSION = 3 // Cập nhật phiên bản cơ sở dữ liệu
 
         // Tên bảng và cột cho bảng user
         const val TABLE_USER = "user"
@@ -20,12 +20,13 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         const val COLUMN_EMAIL = "email"
         const val COLUMN_PASSWORD = "password"
 
-        // Tên bảng và cột cho bảng ghi chú
+        // Tên bảng và cột cho bảng notes
         const val TABLE_NOTE = "notes"
         const val COLUMN_NOTE_ID = "note_id"
         const val COLUMN_TITLE = "title"
         const val COLUMN_CONTENT = "content"
         const val COLUMN_TIMESTAMP = "timestamp"
+        const val COLUMN_USER_ID = "user_id" // Cột mới cho user_id
 
         // Câu lệnh tạo bảng user
         private const val CREATE_TABLE_USER = ("CREATE TABLE $TABLE_USER ("
@@ -33,31 +34,30 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 + "$COLUMN_EMAIL TEXT, "
                 + "$COLUMN_PASSWORD TEXT)")
 
-        // Câu lệnh tạo bảng ghi chú
+        // Câu lệnh tạo bảng ghi chú với user_id
         private const val CREATE_TABLE_NOTE = ("CREATE TABLE IF NOT EXISTS $TABLE_NOTE ("
                 + "$COLUMN_NOTE_ID INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + "$COLUMN_TITLE TEXT, "
                 + "$COLUMN_CONTENT TEXT, "
-                + "$COLUMN_TIMESTAMP DATETIME DEFAULT CURRENT_TIMESTAMP)")
-
-        private const val TAG = "DatabaseHelper"
+                + "$COLUMN_TIMESTAMP DATETIME DEFAULT CURRENT_TIMESTAMP, "
+                + "$COLUMN_USER_ID INTEGER, " // Liên kết với bảng user
+                + "FOREIGN KEY($COLUMN_USER_ID) REFERENCES $TABLE_USER($COLUMN_ID) ON DELETE CASCADE)")
     }
 
     override fun onCreate(db: SQLiteDatabase) {
         try {
+            db.execSQL(CREATE_TABLE_USER)  // Tạo bảng user
             db.execSQL(CREATE_TABLE_NOTE)  // Tạo bảng notes
         } catch (e: Exception) {
             Log.e(TAG, "Error creating table: ${e.message}")
         }
     }
 
+
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        try {
-            db.execSQL("DROP TABLE IF EXISTS $TABLE_NOTE")
-            onCreate(db)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error upgrading table: ${e.message}")
-        }
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_NOTE")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_USER")
+        onCreate(db)
     }
 
     // Hàm thêm người dùng mới vào bảng user
@@ -78,6 +78,32 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             db?.close()
         }
     }
+    // Hàm lấy ID người dùng dựa trên email
+    fun getUserIdByEmail(email: String): Int? {
+        val db = this.readableDatabase
+        var cursor: Cursor? = null
+        return try {
+            cursor = db.query(
+                TABLE_USER,
+                arrayOf(COLUMN_ID),
+                "$COLUMN_EMAIL = ?",
+                arrayOf(email),
+                null,
+                null,
+                null
+            )
+            if (cursor.moveToFirst()) {
+                cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID))
+            } else null
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        } finally {
+            cursor?.close()
+            db.close()
+        }
+    }
+
 
     // Hàm lấy tất cả thông tin người dùng (email và mật khẩu)
     fun getAllUserDetails(): List<Pair<String, String>> {
@@ -129,19 +155,17 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 
     // Hàm thêm ghi chú mới vào bảng notes
-    fun addNote(title: String, content: String): Boolean {
+    fun addNote(title: String, content: String, userId: Int): Boolean {
         var db: SQLiteDatabase? = null
         return try {
             db = this.writableDatabase
             val values = ContentValues().apply {
                 put(COLUMN_TITLE, title)
                 put(COLUMN_CONTENT, content)
+                put(COLUMN_USER_ID, userId) // Lưu user_id vào bảng notes
             }
             val result = db.insert(TABLE_NOTE, null, values)
-            if (result == -1L) {
-                Log.e(TAG, "Failed to insert note into database.")
-            }
-            result != -1L // Trả về true nếu thêm thành công
+            result != -1L
         } catch (e: Exception) {
             Log.e(TAG, "Error inserting note: ${e.message}")
             false
@@ -150,14 +174,18 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         }
     }
 
-    // Hàm lấy tất cả các ghi chú từ bảng notes
-    fun getAllNotes(): List<Pair<String, String>> {
+
+    // Hàm lấy tất cả các ghi chú của người dùng từ bảng notes
+    fun getAllNotes(userId: Int): List<Pair<String, String>> {
         val notes = mutableListOf<Pair<String, String>>()
         val db = this.readableDatabase
         var cursor: Cursor? = null
 
         return try {
-            cursor = db.rawQuery("SELECT * FROM $TABLE_NOTE ORDER BY $COLUMN_TIMESTAMP DESC", null)
+            cursor = db.rawQuery(
+                "SELECT * FROM $TABLE_NOTE WHERE $COLUMN_USER_ID = ? ORDER BY $COLUMN_TIMESTAMP DESC",
+                arrayOf(userId.toString())
+            )
             if (cursor.moveToFirst()) {
                 do {
                     val title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE))
@@ -168,10 +196,11 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             notes
         } catch (e: Exception) {
             e.printStackTrace()
-            emptyList()  // Trả về danh sách rỗng nếu có lỗi
+            emptyList() // Trả về danh sách rỗng nếu có lỗi
         } finally {
             cursor?.close()
             db.close()
         }
     }
+
 }

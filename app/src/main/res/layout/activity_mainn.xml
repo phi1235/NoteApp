@@ -7,7 +7,13 @@
     android:layout_height="match_parent"
     android:background="#F3F3F3"
     tools:context=".MainActivity">
-
+    <!-- Toolbar -->
+<!--    <androidx.appcompat.widget.Toolbar-->
+<!--        android:id="@+id/toolbar"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="?attr/actionBarSize"-->
+<!--        android:background="?attr/"-->
+<!--        app:layout_constraintTop_toTopOf="parent" />-->
     <!-- Dấu 3 gạch - Menu -->
     <ImageView
         android:id="@+id/ivMenu"

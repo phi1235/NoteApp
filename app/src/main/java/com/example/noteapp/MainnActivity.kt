@@ -36,6 +36,7 @@ class MainnActivity : AppCompatActivity() {
         return true
     }
 
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_logout -> {
@@ -46,6 +47,7 @@ class MainnActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,9 +73,9 @@ class MainnActivity : AppCompatActivity() {
         // Cập nhật danh sách ghi chú ban đầu
         loadNotes()
 
-        // Sự kiện click vào Menu
+        // Sự kiện click vào Menu (hiển thị PopupMenu với đăng xuất)
         ivMenu.setOnClickListener {
-            Toast.makeText(this, "Menu Clicked", Toast.LENGTH_SHORT).show()
+            showPopupMenu(it)
         }
 
         // Sự kiện click vào Avatar Profile
@@ -87,7 +89,23 @@ class MainnActivity : AppCompatActivity() {
             startActivityForResult(intent, ADD_NOTE_REQUEST_CODE)
         }
     }
+    // Hàm để hiển thị PopupMenu khi nhấn vào nút ba gạch
+    private fun showPopupMenu(view: View) {
+        val popupMenu = PopupMenu(this, view)
+        popupMenu.menuInflater.inflate(R.menu.menu_main, popupMenu.menu)
 
+        // Xử lý sự kiện khi người dùng chọn mục trong PopupMenu
+        popupMenu.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_logout -> {
+                    logoutUser()
+                    true
+                }
+                else -> false
+            }
+        }
+        popupMenu.show()
+    }
     // Nhận kết quả từ AddNoteActivity
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -111,23 +129,30 @@ class MainnActivity : AppCompatActivity() {
     }
 
     private fun loadNotes() {
+        // Lấy user_id từ SharedPreferences
+        val sharedPref = getSharedPreferences("NoteAppPreferences", Context.MODE_PRIVATE)
+        val userId = sharedPref.getInt("user_id", -1)
+
+        if (userId == -1) {
+            // Nếu không có userId hợp lệ, chuyển về màn hình đăng nhập
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+            return
+        }
+
         // Lấy danh sách ghi chú từ cơ sở dữ liệu và cập nhật giao diện
         notesList.clear()
-        notesList.addAll(dbHelper.getAllNotes())
+        notesList.addAll(dbHelper.getAllNotes(userId)) // Chỉ lấy ghi chú của user hiện tại
 
         if (notesList.isEmpty()) {
             rvNotes.visibility = View.GONE
             Toast.makeText(this, "Chưa có ghi chú nào", Toast.LENGTH_SHORT).show()
         } else {
             rvNotes.visibility = View.VISIBLE
-            // Cập nhật lại dữ liệu trong adapter và thông báo giao diện thay đổi
             noteAdapter.notifyDataSetChanged()
         }
-
-        // In ra tiêu đề của từng ghi chú trong Logcat để kiểm tra
-        for (note in notesList) {
-            Log.d(TAG, "Note Title: ${note.first}, Content: ${note.second}")
-        }
     }
+
 }
 

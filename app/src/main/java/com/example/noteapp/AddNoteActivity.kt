@@ -1,5 +1,6 @@
 package com.example.noteapp
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.widget.EditText
@@ -53,19 +54,27 @@ class AddNoteActivity : AppCompatActivity() {
         val title = etTitle.text.toString().trim()
         val content = etContent.text.toString().trim()
 
-        // Kiểm tra nếu cả tiêu đề và nội dung đều trống thì không lưu
         if (title.isEmpty() && content.isEmpty()) {
             Toast.makeText(this, "Không có nội dung để lưu", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Lưu ghi chú vào cơ sở dữ liệu
-        val success = dbHelper.addNote(title, content)
+        // Lấy user_id từ SharedPreferences
+        val sharedPref = getSharedPreferences("NoteAppPreferences", Context.MODE_PRIVATE)
+        val userId = sharedPref.getInt("user_id", -1)
+
+        if (userId == -1) {
+            Toast.makeText(this, "Không thể xác định người dùng", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Lưu ghi chú vào cơ sở dữ liệu với userId
+        val success = dbHelper.addNote(title, content, userId)
         if (success) {
             Toast.makeText(this, "Đã lưu ghi chú", Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(this, "Lưu ghi chú thất bại", Toast.LENGTH_SHORT).show()
-            Log.e(TAG, "Failed to save note with title: $title, content: $content")
         }
     }
+
 }
