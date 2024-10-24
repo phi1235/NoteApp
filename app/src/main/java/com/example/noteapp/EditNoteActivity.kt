@@ -3,8 +3,10 @@ package com.example.noteapp
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import android.view.MenuItem
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
@@ -12,6 +14,7 @@ class EditNoteActivity : AppCompatActivity() {
 
     private lateinit var ivBackEdit: ImageView
     private lateinit var ivSaveEdit: ImageView
+    private lateinit var ivMenu: ImageView
     private lateinit var etEditTitle: EditText
     private lateinit var etEditContent: EditText
     private lateinit var dbHelper: DatabaseHelper
@@ -23,6 +26,7 @@ class EditNoteActivity : AppCompatActivity() {
 
         ivBackEdit = findViewById(R.id.ivBackEdit)
         ivSaveEdit = findViewById(R.id.ivSaveEdit)
+        ivMenu = findViewById(R.id.ivMenu)
         etEditTitle = findViewById(R.id.etEditTitle)
         etEditContent = findViewById(R.id.etEditContent)
 
@@ -48,7 +52,41 @@ class EditNoteActivity : AppCompatActivity() {
             setResult(RESULT_OK)
             finish()
         }
+        // Bổ sung menu Popup
+        ivMenu.setOnClickListener {
+            showPopupMenu(ivMenu)
+        }
     }
+    // Hàm để hiển thị PopupMenu
+    private fun showPopupMenu(view: ImageView) {
+        val popupMenu = PopupMenu(this, view)
+        popupMenu.menuInflater.inflate(R.menu.menu_options, popupMenu.menu)
+
+        popupMenu.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.menu_delete -> {
+                    // Gọi hàm xóa ghi chú
+                    deleteNote()
+                    true
+                }
+                else -> false
+            }
+        }
+        popupMenu.show()
+    }
+
+    private fun deleteNote() {
+        if (noteId != -1) {
+            dbHelper.deleteNoteById(noteId) // Xóa ghi chú khỏi cơ sở dữ liệu bằng ID
+            Toast.makeText(this, "Ghi chú đã bị xóa", Toast.LENGTH_SHORT).show()
+            setResult(RESULT_OK)  // Để thông báo cho MainActivity cập nhật lại danh sách
+            finish()  // Đóng màn hình EditNoteActivity và quay lại màn hình trước
+        } else {
+            Toast.makeText(this, "Không thể xóa ghi chú", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
 
     // Hàm để tải thông tin ghi chú từ CSDL
     private fun loadNoteData(noteId: Int) {

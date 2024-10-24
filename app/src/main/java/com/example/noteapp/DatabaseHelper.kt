@@ -249,6 +249,11 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             db?.close()
         }
     }
+    fun deleteNoteById(noteId: Int) {
+        val db = this.writableDatabase
+        db.delete(TABLE_NOTE, "$COLUMN_NOTE_ID = ?", arrayOf(noteId.toString()))
+        db.close()
+    }
 
 
 }

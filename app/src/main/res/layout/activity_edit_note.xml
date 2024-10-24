@@ -65,6 +65,17 @@
         android:scrollbars="vertical"/>
 
     <!-- Thanh Công Cụ Dưới Cùng -->
+    <ImageView
+        android:id="@+id/ivMenu"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="Menu"
+        android:src="@drawable/ic_more_vert"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <LinearLayout
         android:id="@+id/clBottomToolbar"
         android:layout_width="0dp"
@@ -86,6 +97,7 @@
             android:padding="0dp"/>
 
         <!-- Thêm các nút còn lại... -->
+
 
     </LinearLayout>
 

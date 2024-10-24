@@ -92,10 +92,10 @@ class MainnActivity : AppCompatActivity() {
             loadNotes()  // Tải lại danh sách ghi chú sau khi thêm
         }
         if (requestCode == EDIT_NOTE_REQUEST_CODE && resultCode == RESULT_OK) {
-            loadNotes()  // Tải lại danh sách ghi chú sau khi chỉnh sửa
+            loadNotes()  // Tải lại danh sách ghi chú sau khi chỉnh sửa va xoa
         }
     }
-
+// load note ve man hinh main sau khi add-edit-delete
     private fun loadNotes() {
         // Lấy user_id từ SharedPreferences
         val sharedPref = getSharedPreferences("NoteAppPreferences", MODE_PRIVATE)
@@ -118,6 +118,7 @@ class MainnActivity : AppCompatActivity() {
             noteAdapter.notifyDataSetChanged()
         }
     }
+    // fun logout account
     private fun logoutUser() {
         // Xóa thông tin đăng nhập trong SharedPreferences
         val sharedPref = getSharedPreferences("NoteAppPreferences", MODE_PRIVATE)
@@ -130,4 +131,5 @@ class MainnActivity : AppCompatActivity() {
         startActivity(intent)
         finish() // Đóng MainnActivity
     }
+
 }
