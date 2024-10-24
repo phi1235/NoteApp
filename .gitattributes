@@ -1,0 +1,4 @@
+*.kt linguist-language=Kotlin
+*.java linguist-language=ignore
+org/gradle/** linguist-vendored
+*.java linguist-language=ignore
