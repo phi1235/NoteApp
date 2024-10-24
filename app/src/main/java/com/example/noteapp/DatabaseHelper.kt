@@ -175,7 +175,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 
 
-    // Hàm lấy tất cả các ghi chú của người dùng từ bảng notes
+    // Hàm lấy tất cả các ghi chú của người dùng từ bảng notes - phan quyen account
     fun getAllNotes(userId: Int): List<Triple<Int, String, String>> {
         val notes = mutableListOf<Triple<Int, String, String>>()
         val db = this.readableDatabase

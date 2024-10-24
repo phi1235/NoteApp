@@ -1,6 +1,7 @@
 package com.example.noteapp
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
@@ -69,10 +70,38 @@ class EditNoteActivity : AppCompatActivity() {
                     deleteNote()
                     true
                 }
+                R.id.menu_share -> {
+                    // Xử lý sự kiện chia sẻ ghi chú
+                    shareNote()
+                    true
+                }
                 else -> false
             }
         }
         popupMenu.show()
+    }
+    // fun shareNote
+    private fun shareNote() {
+        val title = etEditTitle.text.toString().trim()
+        val content = etEditContent.text.toString().trim()
+
+        if (title.isEmpty() && content.isEmpty()) {
+            Toast.makeText(this, "Không có nội dung để chia sẻ", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Nội dung chia sẻ
+        val shareText = "Tiêu đề: $title\nNội dung: $content"
+
+        // Intent để chia sẻ nội dung
+        val shareIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, shareText)
+            type = "text/plain"
+        }
+
+        // Mở giao diện chọn ứng dụng để chia sẻ
+        startActivity(Intent.createChooser(shareIntent, "Chia sẻ ghi chú qua:"))
     }
 
     private fun deleteNote() {
