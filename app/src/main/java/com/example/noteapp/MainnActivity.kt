@@ -1,13 +1,8 @@
 package com.example.noteapp
 
-import android.content.ContentValues.TAG
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageButton
@@ -22,6 +17,7 @@ class MainnActivity : AppCompatActivity() {
 
     companion object {
         const val ADD_NOTE_REQUEST_CODE = 1
+        const val EDIT_NOTE_REQUEST_CODE = 2  // Định nghĩa hằng số cho mã yêu cầu chỉnh sửa
         private const val TAG = "MainnActivity"
     }
 
@@ -29,25 +25,7 @@ class MainnActivity : AppCompatActivity() {
     private lateinit var btnAddNote: ImageButton
     private lateinit var dbHelper: DatabaseHelper
     private lateinit var noteAdapter: NoteAdapter
-    private val notesList = mutableListOf<Pair<String, String>>() // Danh sách ghi chú
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_logout -> {
-                // Xử lý đăng xuất
-                logoutUser()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
+    private val notesList = mutableListOf<Triple<Int, String, String>>() // Danh sách ghi chú, thêm note_id vào Triple
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +42,14 @@ class MainnActivity : AppCompatActivity() {
         dbHelper = DatabaseHelper(this)
 
         // Khởi tạo Adapter với danh sách rỗng
-        noteAdapter = NoteAdapter(notesList)
+        noteAdapter = NoteAdapter(notesList) { position ->
+            // Xử lý khi người dùng nhấn vào ghi chú
+            val noteId = notesList[position].first
+            val intent = Intent(this, EditNoteActivity::class.java).apply {
+                putExtra("note_id", noteId)  // Truyền note_id vào Intent
+            }
+            startActivityForResult(intent, EDIT_NOTE_REQUEST_CODE)
+        }
 
         // Thiết lập RecyclerView với NoteAdapter và LayoutManager
         rvNotes.layoutManager = LinearLayoutManager(this)
@@ -72,15 +57,9 @@ class MainnActivity : AppCompatActivity() {
 
         // Cập nhật danh sách ghi chú ban đầu
         loadNotes()
-
         // Sự kiện click vào Menu (hiển thị PopupMenu với đăng xuất)
         ivMenu.setOnClickListener {
             showPopupMenu(it)
-        }
-
-        // Sự kiện click vào Avatar Profile
-        ivProfile.setOnClickListener {
-            Toast.makeText(this, "Profile Clicked", Toast.LENGTH_SHORT).show()
         }
 
         // Sự kiện click vào nút Thêm Ghi Chú
@@ -106,44 +85,30 @@ class MainnActivity : AppCompatActivity() {
         }
         popupMenu.show()
     }
-    // Nhận kết quả từ AddNoteActivity
+    // Nhận kết quả từ AddNoteActivity hoặc EditNoteActivity
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == ADD_NOTE_REQUEST_CODE && resultCode == RESULT_OK) {
-            // Sau khi ghi chú được thêm, tải lại danh sách ghi chú
-            loadNotes()
+            loadNotes()  // Tải lại danh sách ghi chú sau khi thêm
         }
-    }
-
-    private fun logoutUser() {
-        // Xóa thông tin đăng nhập trong SharedPreferences
-        val sharedPref = getSharedPreferences("NoteAppPreferences", Context.MODE_PRIVATE)
-        val editor = sharedPref.edit()
-        editor.clear()
-        editor.apply()
-
-        // Chuyển hướng về màn hình đăng nhập
-        val intent = Intent(this, LoginActivity::class.java)
-        startActivity(intent)
-        finish() // Đóng MainnActivity
+        if (requestCode == EDIT_NOTE_REQUEST_CODE && resultCode == RESULT_OK) {
+            loadNotes()  // Tải lại danh sách ghi chú sau khi chỉnh sửa
+        }
     }
 
     private fun loadNotes() {
         // Lấy user_id từ SharedPreferences
-        val sharedPref = getSharedPreferences("NoteAppPreferences", Context.MODE_PRIVATE)
+        val sharedPref = getSharedPreferences("NoteAppPreferences", MODE_PRIVATE)
         val userId = sharedPref.getInt("user_id", -1)
 
         if (userId == -1) {
-            // Nếu không có userId hợp lệ, chuyển về màn hình đăng nhập
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
-            finish()
+            Toast.makeText(this, "Không thể xác định người dùng", Toast.LENGTH_SHORT).show()
             return
         }
 
         // Lấy danh sách ghi chú từ cơ sở dữ liệu và cập nhật giao diện
         notesList.clear()
-        notesList.addAll(dbHelper.getAllNotes(userId)) // Chỉ lấy ghi chú của user hiện tại
+        notesList.addAll(dbHelper.getAllNotes(userId)) // Lấy ghi chú của user hiện tại
 
         if (notesList.isEmpty()) {
             rvNotes.visibility = View.GONE
@@ -153,6 +118,16 @@ class MainnActivity : AppCompatActivity() {
             noteAdapter.notifyDataSetChanged()
         }
     }
+    private fun logoutUser() {
+        // Xóa thông tin đăng nhập trong SharedPreferences
+        val sharedPref = getSharedPreferences("NoteAppPreferences", MODE_PRIVATE)
+        val editor = sharedPref.edit()
+        editor.clear()  // Xóa hết các giá trị đã lưu
+        editor.apply()
 
+        // Chuyển hướng về màn hình đăng nhập
+        val intent = Intent(this, LoginActivity::class.java)
+        startActivity(intent)
+        finish() // Đóng MainnActivity
+    }
 }
-

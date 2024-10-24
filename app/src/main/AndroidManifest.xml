@@ -15,6 +15,7 @@
         <activity android:name=".RegisterActivity"></activity>
         <activity android:name=".MainnActivity"></activity>
         <activity android:name=".AddNoteActivity"></activity>
+        <activity android:name=".EditNoteActivity"></activity>
         <activity
 
         android:name=".LoginActivity"
@@ -29,16 +30,7 @@
 
 
 
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-
-        </activity>
 
     </application>
 

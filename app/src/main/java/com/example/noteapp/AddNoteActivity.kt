@@ -36,6 +36,7 @@ class AddNoteActivity : AppCompatActivity() {
         // Xử lý sự kiện click vào nút quay lại
         ivBack.setOnClickListener {
             saveNote()
+            setResult(RESULT_OK)
             finish() // Quay lại màn hình trước đó
         }
 

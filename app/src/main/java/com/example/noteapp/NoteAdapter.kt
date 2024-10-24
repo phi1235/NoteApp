@@ -6,11 +6,20 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class NoteAdapter(private val notes: List<Pair<String, String>>) : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
+class NoteAdapter(
+    private val notes: List<Triple<Int, String, String>>,
+    private val onNoteClick: (Int) -> Unit
+) : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
 
     inner class NoteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvTitle: TextView = itemView.findViewById(R.id.tvTitle)
         val tvContent: TextView = itemView.findViewById(R.id.tvContent)
+        init {
+            // Gọi hàm callback khi nhấn vào item
+            itemView.setOnClickListener {
+                onNoteClick(adapterPosition)
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
@@ -19,7 +28,7 @@ class NoteAdapter(private val notes: List<Pair<String, String>>) : RecyclerView.
     }
 
     override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
-        val (title, content) = notes[position]
+        val (noteId, title, content) = notes[position]
         holder.tvTitle.text = title
         holder.tvContent.text = content
     }

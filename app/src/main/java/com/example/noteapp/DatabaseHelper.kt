@@ -176,8 +176,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
 
     // Hàm lấy tất cả các ghi chú của người dùng từ bảng notes
-    fun getAllNotes(userId: Int): List<Pair<String, String>> {
-        val notes = mutableListOf<Pair<String, String>>()
+    fun getAllNotes(userId: Int): List<Triple<Int, String, String>> {
+        val notes = mutableListOf<Triple<Int, String, String>>()
         val db = this.readableDatabase
         var cursor: Cursor? = null
 
@@ -188,9 +188,10 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             )
             if (cursor.moveToFirst()) {
                 do {
+                    val noteId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_NOTE_ID))
                     val title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE))
                     val content = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTENT))
-                    notes.add(Pair(title, content))
+                    notes.add(Triple(noteId, title, content))
                 } while (cursor.moveToNext())
             }
             notes
@@ -202,5 +203,52 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             db.close()
         }
     }
+
+    fun getNoteById(noteId: Int): Pair<String, String>? {
+        val db = this.readableDatabase
+        var cursor: Cursor? = null
+        return try {
+            cursor = db.query(
+                TABLE_NOTE,
+                arrayOf(COLUMN_TITLE, COLUMN_CONTENT), // Lấy tiêu đề và nội dung
+                "$COLUMN_NOTE_ID = ?", // Điều kiện truy vấn
+                arrayOf(noteId.toString()), // Giá trị của điều kiện
+                null,
+                null,
+                null
+            )
+            if (cursor.moveToFirst()) {
+                val title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE))
+                val content = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTENT))
+                Pair(title, content)  // Trả về tiêu đề và nội dung
+            } else null
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting note: ${e.message}")
+            null
+        } finally {
+            cursor?.close()
+            db.close()
+        }
+    }
+
+
+    fun updateNote(noteId: Int, title: String, content: String): Boolean {
+        var db: SQLiteDatabase? = null
+        return try {
+            db = this.writableDatabase
+            val values = ContentValues().apply {
+                put(COLUMN_TITLE, title)
+                put(COLUMN_CONTENT, content)
+            }
+            val result = db.update(TABLE_NOTE, values, "$COLUMN_NOTE_ID = ?", arrayOf(noteId.toString()))
+            result > 0  // Trả về true nếu cập nhật thành công
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating note: ${e.message}")
+            false
+        } finally {
+            db?.close()
+        }
+    }
+
 
 }
