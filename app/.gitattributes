@@ -1,0 +1,2 @@
+*.kt linguist-language=Kotlin
+*.java linguist-language=ignore
