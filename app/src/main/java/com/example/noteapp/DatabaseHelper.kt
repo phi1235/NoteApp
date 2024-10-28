@@ -254,6 +254,4 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.delete(TABLE_NOTE, "$COLUMN_NOTE_ID = ?", arrayOf(noteId.toString()))
         db.close()
     }
-
-
 }
