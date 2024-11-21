@@ -1,5 +1,6 @@
 package com.example.noteapp
 
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,6 +32,14 @@ class NoteAdapter(
         val (noteId, title, content) = notes[position]
         holder.tvTitle.text = title
         holder.tvContent.text = content
+        // Kiểm tra độ dài nội dung để điều chỉnh số dòng tối đa
+        if (content.length > 60) {
+            holder.tvContent.maxLines = 6  // Giới hạn tối đa số dòng
+            holder.tvContent.ellipsize = TextUtils.TruncateAt.END  // Thêm "..." nếu nội dung quá dài
+        } else {
+            holder.tvContent.maxLines = Int.MAX_VALUE  // Không giới hạn số dòng nếu nội dung ngắn
+            holder.tvContent.ellipsize = null  // Không thêm "..."
+        }
     }
 
     override fun getItemCount(): Int {
