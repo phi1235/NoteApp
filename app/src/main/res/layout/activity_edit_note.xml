@@ -29,6 +29,17 @@
         android:layout_margin="16dp"/>
 
     <!-- Tiêu Đề Ghi Chú -->
+
+    <ImageView
+        android:id="@+id/ivSelectedImage"
+        android:layout_width="380dp"
+        android:layout_height="195dp"
+        android:layout_margin="16dp"
+        android:layout_marginTop="60dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <EditText
         android:id="@+id/etEditTitle"
         android:layout_width="0dp"

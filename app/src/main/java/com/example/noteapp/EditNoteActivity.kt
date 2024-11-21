@@ -1,8 +1,12 @@
 package com.example.noteapp
-
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.MenuItem
 import android.widget.EditText
@@ -10,15 +14,20 @@ import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 
 class EditNoteActivity : AppCompatActivity() {
-
+    private val PICK_IMAGE_REQUEST = 1
+    private val CAPTURE_IMAGE_REQUEST = 2
+    private lateinit var ivAddImage: ImageView
     private lateinit var ivBackEdit: ImageView
     private lateinit var ivSaveEdit: ImageView
     private lateinit var ivMenu: ImageView
     private lateinit var etEditTitle: EditText
     private lateinit var etEditContent: EditText
     private lateinit var dbHelper: DatabaseHelper
+    private lateinit var ivSelectedImage: ImageView
     private var noteId: Int = -1  // Biến để lưu id của ghi chú
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,7 +40,77 @@ class EditNoteActivity : AppCompatActivity() {
 
 
     }
+    private fun openImagePickerDialog() {
+        val options = arrayOf("Chọn ảnh từ thư viện", "Chụp ảnh")
 
+        // Sử dụng Dialog hoặc đơn giản là chọn tùy chọn từ một AlertDialog
+        val builder = android.app.AlertDialog.Builder(this)
+        builder.setTitle("Chọn phương thức thêm ảnh")
+        builder.setItems(options) { dialog, which ->
+            when (which) {
+                0 -> {
+                    // Chọn ảnh từ thư viện
+                    openGallery()
+                }
+                1 -> {
+                    // Chụp ảnh
+                    openCamera()
+                }
+            }
+        }
+        builder.show()
+    }
+
+    private fun openGallery() {
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        startActivityForResult(intent, PICK_IMAGE_REQUEST)
+    }
+
+    private fun openCamera() {
+        // Kiểm tra quyền camera
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            startActivityForResult(intent, CAPTURE_IMAGE_REQUEST)
+        } else {
+            // Yêu cầu quyền camera nếu chưa có
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), CAPTURE_IMAGE_REQUEST)
+        }
+    }
+
+    // Xử lý kết quả trả về từ Intent
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode == RESULT_OK) {
+            when (requestCode) {
+                PICK_IMAGE_REQUEST -> {
+                    val selectedImageUri: Uri? = data?.data
+                    ivSelectedImage.setImageURI(selectedImageUri)
+                    ivSelectedImage.visibility = ImageView.VISIBLE
+                }
+                CAPTURE_IMAGE_REQUEST -> {
+                    val photo: Bitmap = data?.extras?.get("data") as Bitmap
+                    ivSelectedImage.setImageBitmap(photo)
+                    ivSelectedImage.visibility = ImageView.VISIBLE
+                }
+            }
+            // Đẩy tiêu đề và nội dung xuống dưới ảnh
+            etEditTitle.setPadding(0, 0, 0, 200)  // Điều chỉnh padding để không bị che
+            etEditContent.setPadding(0, 0, 0, 200)
+        }
+    }
+
+    // Xử lý kết quả yêu cầu quyền camera
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == CAPTURE_IMAGE_REQUEST) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                openCamera()
+            } else {
+                Toast.makeText(this, "Cần quyền camera để chụp ảnh", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
     private fun setEvent() {
         // Nhận note_id từ Intent
         noteId = intent.getIntExtra("note_id", -1)
@@ -57,6 +136,10 @@ class EditNoteActivity : AppCompatActivity() {
         ivMenu.setOnClickListener {
             showPopupMenu(ivMenu)
         }
+        ivAddImage.setOnClickListener {
+            // Mở dialog để chọn phương thức
+            openImagePickerDialog()
+        }
     }
 
     private fun setControl() {
@@ -65,8 +148,9 @@ class EditNoteActivity : AppCompatActivity() {
         ivMenu = findViewById(R.id.ivMenu)
         etEditTitle = findViewById(R.id.etEditTitle)
         etEditContent = findViewById(R.id.etEditContent)
-
         dbHelper = DatabaseHelper(this)
+        ivAddImage = findViewById(R.id.ivAddImage)
+        ivSelectedImage = findViewById(R.id.ivSelectedImage)
     }
 
     // Hàm để hiển thị PopupMenu
