@@ -21,6 +21,9 @@ class MainnActivity : AppCompatActivity() {
         private const val TAG = "MainnActivity"
     }
 
+    private lateinit var ivMenu: ImageView
+    private lateinit var ivProfile: ImageView
+    private lateinit var etSearch: EditText
     private lateinit var rvNotes: RecyclerView
     private lateinit var btnAddNote: ImageButton
     private lateinit var dbHelper: DatabaseHelper
@@ -31,13 +34,12 @@ class MainnActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mainn)
 
-        // Kết nối với các thành phần UI
-        val ivMenu = findViewById<ImageView>(R.id.ivMenu)
-        val ivProfile = findViewById<ImageView>(R.id.ivProfile)
-        val etSearch = findViewById<EditText>(R.id.etSearch)
-        rvNotes = findViewById(R.id.rvNotes)
-        btnAddNote = findViewById(R.id.btnAddNote)
+        setControl()
+        setEvent()
 
+    }
+
+    private fun setEvent() {
         // Khởi tạo DatabaseHelper
         dbHelper = DatabaseHelper(this)
 
@@ -68,6 +70,17 @@ class MainnActivity : AppCompatActivity() {
             startActivityForResult(intent, ADD_NOTE_REQUEST_CODE)
         }
     }
+
+    private fun setControl() {
+
+        // Kết nối với các thành phần UI
+        ivMenu = findViewById(R.id.ivMenu)
+        ivProfile = findViewById(R.id.ivProfile)
+        etSearch = findViewById(R.id.etSearch)
+        rvNotes = findViewById(R.id.rvNotes)
+        btnAddNote = findViewById(R.id.btnAddNote)
+    }
+
     // Hàm để hiển thị PopupMenu khi nhấn vào nút ba gạch
     private fun showPopupMenu(view: View) {
         val popupMenu = PopupMenu(this, view)

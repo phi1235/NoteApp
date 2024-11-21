@@ -25,14 +25,14 @@ class EditNoteActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_note)
 
-        ivBackEdit = findViewById(R.id.ivBackEdit)
-        ivSaveEdit = findViewById(R.id.ivSaveEdit)
-        ivMenu = findViewById(R.id.ivMenu)
-        etEditTitle = findViewById(R.id.etEditTitle)
-        etEditContent = findViewById(R.id.etEditContent)
+        setControl()
+        setEvent()
 
-        dbHelper = DatabaseHelper(this)
 
+
+    }
+
+    private fun setEvent() {
         // Nhận note_id từ Intent
         noteId = intent.getIntExtra("note_id", -1)
 
@@ -58,6 +58,17 @@ class EditNoteActivity : AppCompatActivity() {
             showPopupMenu(ivMenu)
         }
     }
+
+    private fun setControl() {
+        ivBackEdit = findViewById(R.id.ivBackEdit)
+        ivSaveEdit = findViewById(R.id.ivSaveEdit)
+        ivMenu = findViewById(R.id.ivMenu)
+        etEditTitle = findViewById(R.id.etEditTitle)
+        etEditContent = findViewById(R.id.etEditContent)
+
+        dbHelper = DatabaseHelper(this)
+    }
+
     // Hàm để hiển thị PopupMenu
     private fun showPopupMenu(view: ImageView) {
         val popupMenu = PopupMenu(this, view)

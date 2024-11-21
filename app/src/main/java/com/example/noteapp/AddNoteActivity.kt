@@ -24,15 +24,17 @@ class AddNoteActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_note)
 
-        // Kết nối với các thành phần UI
-        ivBack = findViewById(R.id.ivBack)
-        ivSave = findViewById(R.id.ivSave)
-        etTitle = findViewById(R.id.etTitle)
-        etContent = findViewById(R.id.etContent)
 
+        setControl()
+        setEvent()
         // Khởi tạo DatabaseHelper
         dbHelper = DatabaseHelper(this)
 
+
+
+    }
+
+    private fun setEvent() {
         // Xử lý sự kiện click vào nút quay lại
         ivBack.setOnClickListener {
             saveNote()
@@ -48,7 +50,15 @@ class AddNoteActivity : AppCompatActivity() {
             setResult(RESULT_OK)
             finish()
         }
+    }
 
+    private fun setControl() {
+
+        // Kết nối với các thành phần UI
+        ivBack = findViewById(R.id.ivBack)
+        ivSave = findViewById(R.id.ivSave)
+        etTitle = findViewById(R.id.etTitle)
+        etContent = findViewById(R.id.etContent)
     }
 
     private fun saveNote() {

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.noteapp.DatabaseHelper  // Đảm bảo rằng dòng này được thêm vào
@@ -12,6 +13,11 @@ class RegisterActivity : AppCompatActivity() {
 
     // Khai báo đối tượng DatabaseHelper
     private lateinit var dbHelper: DatabaseHelper
+    private lateinit var etEmail:EditText
+    private lateinit var etPassword:EditText
+    private lateinit var etConfirmPassword:EditText
+    private lateinit var btnRegister: Button
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,12 +26,12 @@ class RegisterActivity : AppCompatActivity() {
         // Khởi tạo đối tượng DatabaseHelper
         dbHelper = DatabaseHelper(this)
 
-        // Kết nối với các thành phần UI
-        val etEmail = findViewById<EditText>(R.id.etEmail)
-        val etPassword = findViewById<EditText>(R.id.etPassword)
-        val etConfirmPassword = findViewById<EditText>(R.id.etConfirmPassword)
-        val btnRegister = findViewById<Button>(R.id.btnRegister)
+       setControl()
+        setEvent()
 
+    }
+
+    private fun setEvent() {
         // Sự kiện khi nhấn nút Đăng ký
         btnRegister.setOnClickListener {
             val email = etEmail.text.toString().trim()
@@ -48,5 +54,13 @@ class RegisterActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun setControl() {
+        // Kết nối với các thành phần UI
+        etEmail = findViewById(R.id.etEmail)
+        etPassword = findViewById(R.id.etPassword)
+        etConfirmPassword = findViewById(R.id.etConfirmPassword)
+        btnRegister = findViewById(R.id.btnRegister)
     }
 }

@@ -14,14 +14,26 @@ class LoginActivity : AppCompatActivity() {
 
     // Khai báo đối tượng DatabaseHelper
     private lateinit var dbHelper: DatabaseHelper
+    private lateinit var etEmail:EditText
+    private lateinit var etPassword:EditText
+    private lateinit var btnLogin:Button
+    private lateinit var tvForgotPassword:TextView
+    private lateinit var tvCreateAccount:TextView
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+        setControl()
+        setEvent()
+    }
 
+    private fun setEvent() {
         // Khởi tạo đối tượng DatabaseHelper
         dbHelper = DatabaseHelper(this)
-
+        // Sự kiện nút Đăng nhập
+        val btnLogin = findViewById<Button>(R.id.btnLogin)
         // Kiểm tra trạng thái đăng nhập
         val sharedPref = getSharedPreferences("NoteAppPreferences", Context.MODE_PRIVATE)
         val isLoggedIn = sharedPref.getBoolean("isLoggedIn", false)
@@ -30,15 +42,6 @@ class LoginActivity : AppCompatActivity() {
             navigateToMain()
             return
         }
-
-        // Kết nối với các thành phần UI
-        val etEmail = findViewById<EditText>(R.id.etEmail)
-        val etPassword = findViewById<EditText>(R.id.etPassword)
-        val btnLogin = findViewById<Button>(R.id.btnLogin)
-        val tvForgotPassword = findViewById<TextView>(R.id.tvForgotPassword)
-        val tvCreateAccount = findViewById<TextView>(R.id.tvCreateAccount)
-
-        // Sự kiện nút Đăng nhập
         btnLogin.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
@@ -51,6 +54,7 @@ class LoginActivity : AppCompatActivity() {
                     val userId = dbHelper.getUserIdByEmail(email) // Lấy user_id của người dùng
 
                     if (userId != null) {
+
                         val editor = sharedPref.edit()
                         editor.putBoolean("isLoggedIn", true)
                         editor.putInt("user_id", userId) // Lưu user_id vào SharedPreferences
@@ -84,6 +88,15 @@ class LoginActivity : AppCompatActivity() {
         tvForgotPassword.setOnClickListener {
             Toast.makeText(this, "Chức năng Quên mật khẩu chưa được phát triển", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun setControl() {
+        // Kết nối với các thành phần UI
+        etEmail = findViewById(R.id.etEmail)
+        etPassword = findViewById(R.id.etPassword)
+        btnLogin = findViewById(R.id.btnLogin)
+        tvForgotPassword = findViewById(R.id.tvForgotPassword)
+        tvCreateAccount = findViewById(R.id.tvCreateAccount)
     }
 
     private fun navigateToMain() {
